@@ -1,5 +1,5 @@
 
-source('utility.R')
+source('utility.R', local=TRUE)
 
 compute_best_hits <- function(dataset, labels) {
   normalized_data <- normalize_cols(assay(dataset))
@@ -26,7 +26,7 @@ compute_1v1_aurocs <- function(votes, aurocs) {
 }
 
 find_top_candidate <- function(votes, aurocs) {
-  candidates <- extract_top_candidates(aurocs)
+  candidates <- extract_top_candidates(aurocs, 5)
   best <- candidates[1]
   votes_best <- votes[names(votes) == best]
   score <- 1

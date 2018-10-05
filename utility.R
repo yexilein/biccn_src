@@ -43,7 +43,7 @@ normalize_cols <- function(M, ranked = TRUE) {
   return(scale_cols(M))
 }
 
-Rcpp::cppFunction('NumericMatrix scale_cols(IntegerMatrix M) {
+Rcpp::cppFunction('NumericMatrix scale_cols(NumericMatrix M) {
   NumericMatrix result(M.nrow(), M.ncol());
   for (int j = 0; j < M.ncol(); j++) {
     double m = 0;

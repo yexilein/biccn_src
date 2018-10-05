@@ -16,7 +16,11 @@ plot_roc <- function(predictors, labels) {
 compute_aurocs <- function(predictors, label_matrix) {
   n_positives <- colSums(label_matrix)
   n_negatives <- nrow(label_matrix) - n_positives
-  sum_of_positive_ranks <- crossprod(label_matrix, apply(predictors, MARGIN = 2, FUN = rank))
+  sum_of_positive_ranks <- crossprod(
+    label_matrix,
+    matrixStats::colRanks(predictors, ties.method = "average", preserveShape=TRUE)
+  )
+  colnames(sum_of_positive_ranks) <- colnames(predictors)
   result <- (sum_of_positive_ranks / n_positives - (n_positives+1)/2) / n_negatives
   return(result)
 }

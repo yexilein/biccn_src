@@ -1,3 +1,11 @@
+/candidates
+/results
+/tests
+/tmp
+._*
+.DS_Store
+*.rds
+
 # History files
 .Rhistory
 .Rapp.history

@@ -53,11 +53,6 @@ extract_top_candidates <- function(aurocs, n = 10) {
   return(names(head(sort(aurocs, decreasing=TRUE), n = n)))
 }
 
-# REVIEW THIS
-normalize_node_degree <- function(votes, voter_id) {
-  return(sweep(votes, 2, colSums(voter_id), FUN = "+") / (rowSums(votes) + ncol(votes)))
-}
-
 extract_components <- function(best_hits, threshold = 0) {
   comp <- igraph::components(make_graph(best_hits, threshold))
   modules <- list()

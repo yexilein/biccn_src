@@ -40,6 +40,26 @@ create_tasic <- function() {
   return(add_to_allen(tasic, col_data))
 }
 
+create_zeisel <- function() {
+  zeisel <- readRDS('~/data/brain/zeisel.rds')
+  class_label <- zeisel$level1class
+  class_label <- plyr::revalue(class_label, c(
+    "astrocytes_ependymal"="Non-neuronal",
+    "endothelial-mural"="Non-neuronal",
+    "interneurons"="GABAergic",
+    "microglia"="Non-neuronal",
+    "oligodendrocytes"="Non-neuronal",
+    "pyramidal CA1"="Glutamatergic",
+    "pyramidal SS"="Glutamatergic"
+  ))
+  col_data <- data.frame(
+    study_id = 'zeisel', class_label = class_label,
+    subclass_label = zeisel$level1class, cluster_label = zeisel$level2class
+  )
+  rownames(col_data) <- colnames(zeisel)
+  return(add_to_allen(zeisel, col_data))
+}
+
 
 variable_genes <- function(dataset, sample_size = 50000, i = 1) {
   if (sample_size < ncol(dataset)) {

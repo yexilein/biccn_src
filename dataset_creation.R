@@ -19,8 +19,9 @@ add_to_allen <- function(other, other_col_data) {
   allen <- readRDS('allen.rds')
   allen_col_data <- colData(allen)[,colnames(other_col_data)]
   genes <- intersect(rownames(allen), rowData(other)$ensembl_gene_id)
-  sub_allen <- allen[rownames(allen) %in% genes,]
-  sub_other <- other[rowData(other)$ensembl_gene_id %in% genes,]
+  sub_allen <- allen[genes,]
+  sub_other <- other[match(genes, rowData(other)$ensembl_gene_id),]
+  assay(sub_other) <- Matrix::Matrix(assay(sub_other), sparse=TRUE)
   result <- SingleCellExperiment(
     list(counts = cbind(assay(sub_allen), assay(sub_other))),
     colData = rbind(allen_col_data, other_col_data)

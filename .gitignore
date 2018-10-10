@@ -2,6 +2,8 @@
 /results
 /tests
 /tmp
+/paul
+
 ._*
 .DS_Store
 *.rds

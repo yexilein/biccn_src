@@ -11,8 +11,10 @@ compute_best_hits <- function(dataset, labels) {
     candidates <- normalized_data[, dataset$study_id == study]
     votes <- crossprod(candidates, voters)
     aurocs <- compute_aurocs(votes, design_matrix(rownames(votes)))
+    #result <- rbind(result, aurocs)
     result <- rbind(result, compute_1v1_aurocs(votes, aurocs))
   }
+  result <- result[, rownames(result)]
   return(result)
 }
 
@@ -69,9 +71,10 @@ extract_components <- function(best_hits, threshold = 0) {
 }
 
 make_graph <- function(best_hits, threshold = 0) {
-  best_hits[best_hits > threshold] <- 1
-  best_hits <- best_hits * t(best_hits)
-  igraph::graph_from_adjacency_matrix(best_hits)
+  adj <- 0*best_hits
+  adj[best_hits > threshold] <- 1
+  adj <- adj * t(adj)
+  igraph::graph_from_adjacency_matrix(adj)
 }
 
 plot_components <- function(best_hits, components, directory = ".") {

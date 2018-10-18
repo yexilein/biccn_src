@@ -2,11 +2,11 @@
 source("utility.R", local = TRUE)
 
 assess_module_labels <- function(dataset, cell_types, modules, hvg) {
-  go_terms <- go_slim(rownames(dataset))[1:3]
+  go_terms <- go_slim(rownames(dataset))
   go_terms$hvg <- hvg
   dataset <- dataset[rownames(dataset) %in% unique(unlist(go_terms)),]
   module_labels <- create_module_labels(dataset$study_id, cell_types, modules)
-  call_my_metaneighbor(dataset, go_terms, module_labels)
+  return(call_my_metaneighbor(dataset, go_terms, module_labels))
 }
 
 call_metaneighbor <- function(dataset, go_terms, module_labels) {

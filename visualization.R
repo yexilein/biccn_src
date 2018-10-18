@@ -81,11 +81,14 @@ log_normalize <- function(matrix_) {
 }
 
 
-bplot <- function(nv_mat) {
+bplot <- function(nv_mat, hvg=NULL, cex=1) {
   Celltype = rep(colnames(nv_mat),each=dim(nv_mat)[1])
   ROCValues = unlist(lapply(seq_len(dim(nv_mat)[2]), function(i) nv_mat[,i]))
   beanplot::beanplot(
     ROCValues ~ Celltype, border="NA", col="gray", ylab="AUROC", log = "",
-    what=c(0,1,1,1), frame.plot = FALSE, las = 2, cex.axis = .5
+    what=c(0,1,1,1), frame.plot = FALSE, las = 2, cex.axis = cex
   )
+  if (!is.null(hvg)) {
+    points(hvg ~ factor(names(hvg)), pch=17, col="red")
+  }
 }

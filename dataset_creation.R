@@ -1,22 +1,8 @@
 
 library(SingleCellExperiment)
 
-create_allen_paul <- function() {
-  paul <- readRDS('~/data/brain/paul.rds')
-  paul_cluster <- sapply(strsplit(colnames(paul), "\\."), head, 1)
-  paul_subclass <- paul_cluster
-  paul_subclass[paul_subclass %in% c('PVC', 'CHC1', 'CHC2')] <- 'Pvalb'
-  paul_subclass[paul_subclass %in% c('MNC', 'LPC')] <- 'Sst'
-  paul_subclass[paul_subclass %in% c('ISC', 'CCKC')] <- 'Vip'
-  paul_col_data <- data.frame(study_id = 'paul', class_label = 'GABAergic',
-                              subclass_label = paul_subclass,
-                              cluster_label = paul_cluster)
-  result <- add_to_allen(paul, paul_col_data)
-  return(result)
-}
-
 add_to_allen <- function(other, other_col_data) {
-  allen <- readRDS('allen.rds')
+  allen <- readRDS('../results/allen/allen.rds')
   allen_col_data <- colData(allen)[,colnames(other_col_data)]
   genes <- intersect(rownames(allen), rowData(other)$ensembl_gene_id)
   sub_allen <- allen[genes,]

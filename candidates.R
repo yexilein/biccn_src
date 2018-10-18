@@ -77,20 +77,71 @@ make_graph <- function(best_hits, threshold = 0) {
   igraph::graph_from_adjacency_matrix(adj)
 }
 
-plot_components <- function(best_hits, components, directory = ".") {
-  colfunc <- colorRampPalette(c("white", "blue"))
-  breaks <- c(0, 0.5, 0.7, 0.9, 1)
+write_component_summary <- function(components, directory = ".") {
+  f <- file(file.path(directory, "component_summary.txt"), "w")
+  writeLines("Label\tComponent", f)
+  for (i in seq_along(components$modules)) {
+    writeLines(paste(components$modules[[i]], i, sep="\t"), f)
+  }
+  writeLines(paste(components$outliers, -1, sep="\t"), f)
+  close(f)
+}
+
+plot_components <- function(best_hits, components, directory = ".", reorder=FALSE) {
+  dendrogram <- if (reorder) "both" else "none"
+  color_scale <- c(RColorBrewer::brewer.pal(8, "Set2"),
+                   RColorBrewer::brewer.pal(9, "Set1"),
+                   RColorBrewer::brewer.pal(12, "Set3"))
+  breaks <- c(0, 0.5, 0.7, 0.9, 0.95, 0.99, 1)
+  auroc_cols <- colorRampPalette(c("white", "blue"))(length(breaks)-1)
+  study_ids = unique(get_study_id(unlist(components)))
+  study_cols <- color_scale[seq_along(study_ids)]
+  names(study_cols) <- study_ids
   for (i in seq_along(components)) {
     c <- components[[i]]
     dat <- best_hits[c, c]
-    reorder_entries <- as.dendrogram(hclust(as.dist(1-dat), method="average"))
+    comp_cols <- study_cols[get_study_id(rownames(dat))]
+    comp_cell_types <- get_cell_type(rownames(dat))
+    if (reorder) {
+      reorder <- as.dendrogram(hclust(as.dist(1-dat), method="average"))
+    }
     pdf(file.path(directory, paste0("component_", i, ".pdf")))
     gplots::heatmap.2(
-      best_hits[c, c], margins = c(10,10),
+      dat, margins = c(10,10),
+      labRow = comp_cell_types, labCol = comp_cell_types,
       key.xlab="AUROC", key.title=NA, cexRow = .7, cexCol = .7,
-      trace = "none", col = colfunc(length(breaks)-1), breaks = breaks,
-      Rowv = reorder_entries, Colv = reorder_entries
+      trace = "none", col = auroc_cols, breaks = breaks,
+      Rowv = reorder, Colv = reorder, dendrogram = dendrogram,
+      RowSideColors = rev(comp_cols), ColSideColors = comp_cols,
+      revC = TRUE
     )
+    par(lend = 1)
+    legend("topright", inset = c(0, 0),
+           legend = names(study_cols),
+           col = study_cols, pt.cex = 1, cex = 0.5, lwd = 10, bty="n")
     dev.off()
   }
+}
+
+score_components <- function(best_hits, components) {
+  name <- c()
+  n_studies <- c()
+  score <- c()
+  for (i in seq_along(components)) {
+    c <- components[[i]]
+    name <- c(name, get_cell_type(c[1]))
+    n_studies <- c(n_studies, length(unique(get_study_id(c))))
+    score <- c(score, mean(best_hits[c, c]))
+  }
+  return(data.frame(n_studies = n_studies, score = score, row.names = name))
+}
+
+export_filtered_best_hits <- function(best_hits, components, directory=".") {
+  labels <- unlist(components)
+  filtered_best_hits <- matrix(0, nrow=length(labels), ncol=length(labels),
+                               dimnames=list(labels, labels))
+  for (m in components) {
+    filtered_best_hits[m,m] <- best_hits[m,m]
+  }
+  write.table(filtered_best_hits, file.path(directory, 'filtered_best_hits.txt'))
 }

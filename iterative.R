@@ -20,8 +20,8 @@ iterative_metaneighbor <- function(dataset, depth = 3, output_dir, suffix = "") 
   }
 }
 
-divide_dataset <- function(dataset, aurocs) {
-  data_labels <- paste(dataset$study_id, dataset$cluster_label, sep = "|")
+divide_dataset <- function(dataset, aurocs, cell_labels) {
+  data_labels <- paste(dataset$study_id, cell_labels, sep = "|")
   group_labels <- divide_labels(aurocs)
   return(list(dataset[, data_labels %in% group_labels[[1]]],
               dataset[, data_labels %in% group_labels[[2]]]))

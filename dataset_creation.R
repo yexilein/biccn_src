@@ -46,6 +46,19 @@ create_zeisel <- function() {
   return(add_to_allen(zeisel, col_data))
 }
 
+infer_subclasses_from_clusters = function(clusters) {
+    valid_subclasses = c("Astro", "Endo", "L2/3 IT", "L5 IT", "L5 NP", "L5 PT", "L6 CT", "L6 IT", "L6b", "Lamp5", "Oligo",
+                         "OPC", "Pvalb", "Sncg", "Sst", "Vip", "VLMC")
+    return(filter_names(clusters, valid_subclasses))
+}
+
+filter_names = function(long_names, short_names) {
+    result = as.character(long_names)
+    for (s in short_names) {
+        result[startsWith(result, s)] = s
+    }
+    return(result)
+}
 
 variable_genes <- function(dataset, sample_size = 50000, i = 1) {
   if (sample_size < ncol(dataset)) {

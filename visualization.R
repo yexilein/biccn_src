@@ -20,34 +20,59 @@ replace_labels <- function(labels, label_mapping) {
 }
 
 plot_NV_heatmap <- function(
-  dat, reorder_entries = TRUE, breaks = seq(0, 1, length = 21), norm = ""
+  dat, reorder_entries = TRUE, breaks = seq(0, 1, length = 21), norm = "",
+  row_col = TRUE, label_legend = TRUE,
+  axis_labels = FALSE, axis_cex = 0.5
 ) {
-  cols = rev(colorRampPalette(RColorBrewer::brewer.pal(11,"RdYlBu"))(20))
-  row_colors = get_colors(get_cell_type(colnames(dat)))
-  col_colors = get_colors(get_study_id(colnames(dat)))
   if (reorder_entries) {
-    reorder_entries <- as.dendrogram(hclust(as.dist(1-dat), method="average"))
+    reorder_entries = as.dendrogram(hclust(as.dist(1-dat), method="average"))
   }
-  if (norm == "rank") {
+
+    if (norm == "rank") {
      dat <- rank_normalize(dat)
   } else if (norm == "log") {
      dat <- log_normalize(dat)
   }
-  gplots::heatmap.2(
-    dat, margins = c(11,11),
-    key = TRUE, keysize = 1, key.xlab="AUROC", key.title="NULL",
-    labRow = NA, offsetRow=0.1, labCol = NA, offsetCol=0.1,
-    trace = "none", density.info = "none", col = cols, breaks = breaks,
-    Rowv = reorder_entries, Colv = reorder_entries, dendrogram = "row",
-    RowSideColors = row_colors$colors, ColSideColors = col_colors$colors
+  
+  arg_list = list(
+      x = dat, margins = c(11,11),
+      key = TRUE, keysize = 1, key.xlab = "AUROC", key.title = "NULL",
+      offsetRow=0.1, offsetCol=0.1, cexRow = axis_cex, cexCol = axis_cex,
+      trace = "none", density.info = "none", breaks = breaks,
+      Rowv = reorder_entries, Colv = reorder_entries, dendrogram = "row",
+      col = rev(colorRampPalette(RColorBrewer::brewer.pal(11,"RdYlBu"))(20))
   )
+  if (row_col) {
+      row_colors = get_colors(get_cell_type(colnames(dat)))
+      arg_list$RowSideColors = row_colors$colors
+  }
+  col_colors = get_colors(get_study_id(colnames(dat)))
+  arg_list$ColSideColors = col_colors$colors
+    
+  if (!axis_labels) {
+      arg_list$labRow = NA
+      arg_list$labCol = NA
+  }
+    
+  do.call(gplots::heatmap.2, arg_list)
+
+#  gplots::heatmap.2(
+#    dat, margins = c(11,11),
+#    key = TRUE, keysize = 1, key.xlab="AUROC", key.title="NULL",
+#    labRow = lab_row, offsetRow=0.1, labCol = lab_col, offsetCol=0.1, cexRow = axis_cex, cexCol = axis_cex,
+#    trace = "none", density.info = "none", col = cols, breaks = breaks,
+#    Rowv = reorder_entries, Colv = reorder_entries, dendrogram = "row",
+#    RowSideColors = row_colors$colors, ColSideColors = col_colors$colors
+#  )
   par(lend = 1)
   legend("topright", inset = c(0, .2),
          legend = col_colors$legend,
          col = col_colors$color_scale, pt.cex = 1, cex = 0.5, lwd = 10, bty="n")
-  legend("topright", inset = c(0, .3),
-         legend = row_colors$legend,
-         col = row_colors$color_scale, cex = 0.5, lwd = 10, bty="n")
+  if (row_col & label_legend) {
+      legend("topright", inset = c(0, .3),
+             legend = row_colors$legend,
+             col = row_colors$color_scale, cex = 0.5, lwd = 10, bty="n")
+  }
 }
 
 get_colors <- function(labels) {

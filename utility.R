@@ -63,9 +63,9 @@ Rcpp::cppFunction('NumericMatrix scale_cols(NumericMatrix M) {
 }')
 
 get_study_id <- function(cluster_name) {
-  return(sapply(strsplit(cluster_name, "\\|"), head, 1))
+  return(sapply(strsplit(cluster_name, "|", fixed=TRUE), "[", 1))
 }
 
 get_cell_type <- function(cluster_name) {
-  return(sapply(strsplit(cluster_name, "\\|"), tail, 1))
+  return(sapply(strsplit(cluster_name, "|", fixed=TRUE), "[", -1))
 }
